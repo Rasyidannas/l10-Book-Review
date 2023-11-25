@@ -14,10 +14,22 @@ return new class extends Migration
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
 
+            //this is foreign key
+            // $table->unsignedBigInteger('book_id');
+
             $table->text('review');
             $table->unsignedTinyInteger('rating');
 
             $table->timestamps();
+
+            //setup foreign key
+
+            // this is longway
+            // $table->foreign('book_id')->references('id')->on('books')
+            //     ->onDelete('cascade');
+
+            //this is shortway from above 
+            $table->foreignId('book_id')->constrained()->cascadeOnDelete();
         });
     }
 

@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Book extends Model
 {
     use HasFactory;
+
+    //this is setup relationship database
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }
