@@ -12,7 +12,7 @@ class BookController extends Controller
      */
     public function index(Request $request)
     {
-        //this for get input user by $request
+        //this for get input user by $request for filtering by title
         $title = $request->input('title');
 
         // dd(Book::all());
