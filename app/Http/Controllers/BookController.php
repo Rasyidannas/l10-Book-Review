@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Book;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
@@ -9,9 +10,21 @@ class BookController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        //this for get input user by $request
+        $title = $request->input('title');
+
+        // dd(Book::all());
+
+        // when() method will run the regular function/arrow function when first argument true and this is a method from collection. So, Books models is a colletion
+        $books = Book::when(
+            $title,
+            fn ($query, $title) =>
+            $query->title($title)
+        )->get();
+
+        return view('books.index', ['books' => $books]);
     }
 
     /**
