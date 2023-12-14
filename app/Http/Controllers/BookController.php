@@ -14,6 +14,7 @@ class BookController extends Controller
     {
         //this for get input user by $request for filtering by title
         $title = $request->input('title');
+        $filter = $request->input('filter', '');
 
         // dd(Book::all());
 
@@ -22,7 +23,19 @@ class BookController extends Controller
             $title,
             fn ($query, $title) =>
             $query->title($title)
-        )->get();
+        );
+
+        //this is for get request filter and get method in local scope in Book Model
+        $books = match ($filter) {
+            "popular_last_month" => $books->popularLastMonth(),
+            "popular_last_6months" => $books->popularLast6Months(),
+            "highest_rated_last_month" => $books->highestRatedLastMonth(),
+            "highest_rated_last_6months" => $books->highestRatedLast6Months(),
+            default => $books->latest()
+        };
+
+        //this for run above
+        $books = $books->get();
 
         return view('books.index', ['books' => $books]);
     }
