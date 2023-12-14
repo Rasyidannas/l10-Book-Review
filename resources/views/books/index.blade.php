@@ -6,9 +6,29 @@
    <form method="GET" action="{{ route('books.index') }}" class="mb-4 flex items-center space-x-2">
       {{-- this request() for can give value before in input --}}
       <input type="text" name="title" placeholder="Search by title" value="{{ request('title') }}" class="input h-10" />
+      <input type="hidden" name="filter" value="{{ request('filter') }}" />
       <button type="submit" class="btn h-10">Search</button>
       <a href="{{ route('books.index') }}" class="btn h-10">Clear</a>
    </form>
+
+   <div class="filter-container mb-4 flex">
+      @php
+          $filters = [
+            "" => "Latest",
+            "popular_last_month" => "Popular Last Month",
+            "popular_last_6months" => "Popular Last 6 Months",
+            "highest_rated_last_month" => "Popular Rated Last Month",
+            "highest_rated_last_6month" => "Popular Rated Last 6 Months",
+         ];
+      @endphp
+
+      @foreach ($filters as $key => $label)
+         {{-- route with second argument can send the query in url. example this filter(books?filter=$key) and for ...request()->query() this is for add query before in url and merge it with new --}}
+          <a href="{{ route('books.index', [...request()->query(), 'filter' => $key]) }}" class="{{ request('filter') === $key || (request('filter') === null && $key === '') ? 'filter-item-active' : 'filter-item' }}">
+            {{ $label }}
+          </a>
+      @endforeach
+   </div>
 
    <ul>
       @forelse ($books as $book)
