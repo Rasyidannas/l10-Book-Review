@@ -35,7 +35,14 @@ class BookController extends Controller
         };
 
         //this for run above
-        $books = $books->get();
+        // $books = $books->get();
+
+        //this is for Retrive and Store
+        $cahceKey = 'books:' . $filter . ":" > $title;
+        $books = cache()->remember($cahceKey, 3600, function () use ($books) {
+            //dd("not from cache"); //this line is for check if return not run/happen
+            return $books->get();
+        }); // third argument will store if first argument nothing
 
         return view('books.index', ['books' => $books]);
     }
