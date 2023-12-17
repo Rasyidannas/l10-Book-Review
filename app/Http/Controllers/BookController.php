@@ -37,12 +37,15 @@ class BookController extends Controller
         //this for run above
         // $books = $books->get();
 
-        //this is for Retrive and Store
-        $cahceKey = 'books:' . $filter . ":" > $title;
-        $books = cache()->remember($cahceKey, 3600, function () use ($books) {
-            //dd("not from cache"); //this line is for check if return not run/happen
-            return $books->get();
-        }); // third argument will store if first argument nothing
+        //this is for Retrive and Store cache
+        $cacheKey = 'books:' . $filter . ':' . $title;
+        $books =
+            cache()->remember(
+                $cacheKey,
+                3600,
+                fn () =>
+                $books->get()
+            ); // third argument will store if first argument nothing
 
         return view('books.index', ['books' => $books]);
     }
@@ -68,10 +71,16 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
-        //this second argument will access for show.blade.php and load() for Lazy Eager Loading
-        return view('books.show', ['book' => $book->load([
+        //this is for Retrive and Store cache
+        $cacheKey = 'book:' . $book->id;
+
+        //this load() for Lazy Eager Loading
+        $book = cache()->remember($cacheKey, 3600, fn () => $book->load([
             'reviews' => fn ($query) => $query->latest()
-        ])]);
+        ]));
+
+        //this second argument will access for show.blade.php 
+        return view('books.show', ['book' => $book]);
     }
 
     /**
