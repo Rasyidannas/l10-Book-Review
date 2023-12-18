@@ -23,19 +23,30 @@ class Book extends Model
         return $query->where('title', 'LIKE', '%' . $title . '%');
     }
 
-    public function scopePopular(Builder $query, $from = null, $to = null): Builder|QueryBuilder
+    //this scope for show review with date range
+    public function scopeWithReviewsCount(Builder $query, $from = null, $to = null): Builder|QueryBuilder
     {
         return $query->withCount([
             'reviews' => fn (Builder $q) => $this->dateRangeFilter($q, $from, $to) //this using arrow function because $this will/can acces in outside class and access private method
-        ])
+        ]);
+    }
+
+    public function scopeWithAvgRating(Builder $query, $from = null, $to = null): Builder|QueryBuilder
+    {
+        return $query->withAvg([
+            'reviews' => fn (Builder $q) => $this->dateRangeFilter($q, $from, $to) //this using arrow function because $this will/can acces in outside class and access private method
+        ], 'rating');
+    }
+
+    public function scopePopular(Builder $query, $from = null, $to = null): Builder|QueryBuilder
+    {
+        return $query->withReviewsCount()
             ->orderBy('reviews_count', 'desc'); //it will give alias column(new column with name reviews_count). it have rule name colomn before and add count from withCount
     }
 
     public function scopeHighestRated(Builder $query, $from = null, $to = null): Builder|QueryBuilder
     {
-        return $query->withAvg([
-            'reviews' => fn (Builder $q) => $this->dateRangeFilter($q, $from, $to) //this using arrow function because $this will/can acces in outside class and access private method
-        ], 'rating')
+        return $query->withAvgRating()
             ->orderBy('reviews_avg_rating', 'desc');
     }
 
@@ -87,5 +98,13 @@ class Book extends Model
         return $query->highestRated(now()->subMonths(6), now())
             ->popular(now()->subMonths(6), now())
             ->minReviews(5);
+    }
+
+    protected static function booted(): void
+    {
+        //this is for event model for updated (when book model updated function will excute)
+        static::updated(fn (Book $book) => cache()->forget('book:' . $book->id));
+        //this is for event model for deleted (when book model deleted function will excute)
+        static::deleted(fn (Book $book) => cache()->forget('book:' . $book->id));
     }
 }
