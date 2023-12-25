@@ -23,5 +23,7 @@ class Review extends Model
         static::updated(fn (Review $review) => cache()->forget('book:' . $review->book_id));
         //this is for event model for deleted (when review model deleted function will excute)
         static::deleted(fn (Review $review) => cache()->forget('book:' . $review->book_id));
+        //this is for event model for created (when review model created function will excute)
+        static::created(fn (Review $review) => cache()->forget('book:' . $review->book_id));
     }
 }
